@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1 align="center">Gráfico para análise do comportamento de usuários influentes</h1>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script src="https://code.highcharts.com/modules/data.js"></script>
+        <script src="https://code.highcharts.com/modules/drilldown.js"></script>
+
+    <script>
+
+        var numeroCompartilhamento = 0
+        var numeroComentarios = 0
+        var numeroFavoritos = 0
+        var totalInteracoes = 0
+        var comentarioAmbev = 0
+        var comentarioNike = 0
+        var comentarioHonda = 0
+        var comentarioOi = 0
+        var comentarioItau = 0
+        var compartilhamentoAmbev = 0
+        var compartilhamentoNike = 0
+        var compartilhamentoHonda = 0
+        var compartilhamentoOi = 0
+        var compartilhamentoItau = 0
+        var favoritoAmbev = 0
+        var favoritoNike = 0
+        var favoritoHonda = 0
+        var favoritoOi = 0
+        var favoritoItau = 0
+        
+
+        function contaMarcas(idMarca,tipoInteracao){
+
+            if(tipoInteracao == "SHARE"){
+
+                switch(idMarca){
+                    case 1:
+                        compartilhamentoAmbev++
+                        break;
+                    case 2:
+                        compartilhamentoNike++
+                        break;
+                    case 3:
+                        compartilhamentoHonda++
+                        break;
+                    case 4:
+                        compartilhamentoOi++
+                        break;
+                    case 5:
+                        compartilhamentoItau++
+                        break;
+                    default:
+                        //
+                }
+
+            } else if(tipoInteracao == "COMMENT"){
+                switch(idMarca){
+                    case 1:
+                        comentarioAmbev++
+                        break;
+                    case 2:
+                        comentarioNike++
+                        break;
+                    case 3:
+                        comentarioHonda++
+                        break;
+                    case 4:
+                        comentarioOi++
+                        break;
+                    case 5:
+                        comentarioItau++
+                        break;
+                    default:
+                        //
+                }
+            }else{
+                switch(idMarca){
+                    case 1:
+                        favoritoAmbev++
+                        break;
+                    case 2:
+                        favoritoNike++
+                        break;
+                    case 3:
+                        favoritoHonda++
+                        break;
+                    case 4:
+                        favoritoOi++
+                        break;
+                    case 5:
+                        favoritoItau++
+                        break;
+                    default:
+                        //
+                }
+            }
+
+        }
+
+        $(document).ready(function(){
+            $("#fetch").click(function(event){
+                $.getJSON("interactions.json", function(result){
+                    $.each(result, function(i, field){
+                        switch(field.type){
+                            case "SHARE":
+                                numeroCompartilhamento++
+                                contaMarcas(field.brand,"SHARE")
+                                break;
+                            case "COMMENT":
+                                numeroComentarios++
+                                contaMarcas(field.brand,"COMMENT")
+                                break;
+                            case "FAVORITE":
+                                numeroFavoritos++
+                                contaMarcas(field.brand,"FAVORITE")
+                                break;
+                            default:
+                                //
+                        }
+                        totalInteracoes++
+                        //$("div").append(field.type + " ");
+                    });
+
+                    // Cria o gráfico
+                    Highcharts.chart('container', {
+                        chart: {
+                            type: 'column'
+                        },
+                        title: {
+                            text: 'Análise do comportamento de usuários influentes'
+                        },
+                        subtitle: {
+                            text: 'Clique nas colunas para ver as marcas.'
+                        },
+                        xAxis: {
+                            type: 'category'
+                        },
+                        yAxis: {
+                            title: {
+                                text: 'Total percentual'
+                            }
+
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        plotOptions: {
+                            series: {
+                                borderWidth: 0,
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.y:.1f}%'
+                                }
+                            }
+                        },
+
+                        tooltip: {
+                            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                        },
+
+                        series: [
+                            {
+                                name: "Interações",
+                                colorByPoint: true,
+                                data: [
+                                    {
+                                        name: "Comentarios",
+                                        y: (numeroComentarios * 100) / totalInteracoes,
+                                        drilldown: "Comentarios"
+                                    },
+                                    {
+                                        name: "Compartilhamentos",
+                                        y: (numeroCompartilhamento * 100) / totalInteracoes,
+                                        drilldown: "Compartilhamentos"
+                                    },
+                                    {
+                                        name: "Favoritos",
+                                        y: (numeroFavoritos * 100) / totalInteracoes,
+                                        drilldown: "Favoritos"
+                                    }
+                                ]
+                            }
+                        ],
+                        drilldown: {
+                            series: [
+                                {
+                                    name: "Comentarios",
+                                    id: "Comentarios",
+                                    data: [
+                                        [       
+                                            "Ambev",
+                                            (comentarioAmbev * 100) / numeroComentarios
+                                        ],
+                                        [
+                                            "Nike",
+                                            (comentarioNike * 100) / numeroComentarios
+                                        ],
+                                        [
+                                            "Honda",
+                                            (comentarioHonda * 100) / numeroComentarios
+                                        ],
+                                        [
+                                            "Oi",
+                                            (comentarioOi * 100) / numeroComentarios
+                                        ],
+                                        [   
+                                            "Itau",
+                                            (comentarioItau * 100) / numeroComentarios
+                                        ]
+                                    ]
+                                },
+                                {
+                                    name: "Compartilhamentos",
+                                    id: "Compartilhamentos",
+                                    data: [
+                                        [
+                                            "Ambev",
+                                            (compartilhamentoAmbev * 100) / numeroCompartilhamento
+                                        ],
+                                        [
+                                            "Nike",
+                                            (compartilhamentoNike * 100) / numeroCompartilhamento
+                                        ],
+                                        [   
+                                            "Honda",
+                                            (compartilhamentoHonda * 100) / numeroCompartilhamento
+                                        ],
+                                        [
+                                            "Oi",
+                                            (compartilhamentoOi * 100) / numeroCompartilhamento
+                                        ],
+                                        [       
+                                            "Itau",
+                                            (compartilhamentoItau * 100) / numeroCompartilhamento
+                                        ]
+                                    ]
+                                },
+                                {
+                                    name: "Favoritos",
+                                    id: "Favoritos",
+                                    data: [
+                                        [
+                                            "Ambev",
+                                            (favoritoAmbev * 100) / numeroFavoritos
+                                        ],
+                                        [
+                                            "Nike",
+                                            (favoritoNike * 100) / numeroFavoritos
+                                        ],
+                                        [
+                                            "Honda",
+                                            (favoritoHonda * 100) / numeroFavoritos
+                                        ],
+                                        [
+                                            "Oi",
+                                            (favoritoItau * 100) / numeroFavoritos
+                                        ],
+                                        [
+                                            "Itau",
+                                            (favoritoItau * 100) / numeroFavoritos
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    })
+                })
+            })
+        })
+        
+    </script>
+
+    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+    <div id = "display" style = "background-color:#39B54A;"></div>
+           
+    <input type = "button" id = "fetch" value = "Gerar Gráfico" />
+
+</body>
+</html>
